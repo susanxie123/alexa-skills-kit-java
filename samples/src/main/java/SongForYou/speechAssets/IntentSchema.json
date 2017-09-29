@@ -1,0 +1,32 @@
+{
+  "intents": [
+    {
+      "intent": "AMAZON.PauseIntent"
+    },
+    {
+      "intent": "AMAZON.ResumeIntent"
+    },
+    {
+      "intent": "RequestSongIntent",
+      "slots": [
+        {
+          "name": "SongName",
+          "type": "AMAZON.MusicRecording"
+        },
+        {
+          "name": "ContactName",
+          "type": "CONTACT_TYPE"
+        }
+      ]
+    },
+    {
+      "intent": "PlaySongIntent",
+      "slots": [
+        {
+          "name": "ContactName",
+          "type": "CONTACT_TYPE"
+        }
+      ]
+    }
+  ]
+}
