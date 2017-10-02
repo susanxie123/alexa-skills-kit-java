@@ -5,6 +5,8 @@ import java.net.*;
 import org.json.JSONObject;
 import SongForYou.Contacts.ContactsDao;
 import SongForYou.Notifications.NotificationSender;
+import SongForYou.RequestedUrlStore.RequestedUrlDao;
+import SongForYou.RequestedUrlStore.RequestedUrlDataItem;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.*;
 import com.amazon.speech.ui.OutputSpeech;
@@ -15,11 +17,13 @@ import org.slf4j.LoggerFactory;
 public class SongForYouSpeechlet implements Speechlet {
     private static final Logger log = LoggerFactory.getLogger(SongForYouSpeechlet.class);
     private ContactsDao contactsDao;
+    private RequestedUrlDao requestedUrlDao;
     private NotificationSender notificationSender;
 
     private static final String CONTACT_NAME_SLOT_TYPE = "ContactName";
     private static final String SONG_NAME_SLOT_TYPE = "SongName";
     private static final String DEFAULT_PHONENUMBER = "7348461740";
+    private static final String DEFAULT_USERNAME = "Alice"; // This is the user that request and receive the song
 
     @Override
     public void onSessionStarted(final SessionStartedRequest request, final Session session)
@@ -85,6 +89,16 @@ public class SongForYouSpeechlet implements Speechlet {
             // Maybe disambiguate the name??
 
             // Find the song url from database?
+            String url;
+            try {
+                String requestedBy = intent.getSlot(CONTACT_NAME_SLOT_TYPE).getValue();
+                url = requestedUrlDao.getRequestedUrl(DEFAULT_USERNAME, requestedBy);
+            }
+            catch (NullPointerException ex) {
+                log.info("User did not specify who requested the song.");
+                url = requestedUrlDao.getRequestedUrl(DEFAULT_USERNAME);
+            }
+            log.info("Found the url for the requested song: {}", url);
 
             // Return audio playback response
             return new SpeechletResponse();
@@ -113,6 +127,7 @@ public class SongForYouSpeechlet implements Speechlet {
     private void initializeComponents() {
         //Database stuff and other components
         this.contactsDao = new ContactsDao();
+        this.requestedUrlDao = new RequestedUrlDao();
         this.notificationSender = new NotificationSender();
     }
 
