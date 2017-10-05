@@ -1,0 +1,6 @@
+RequestSongIntent play {SongName} for {ContactName}
+RequestSongIntent play some music for {ContactName}
+RequestSongIntent play a song for {ContactName}
+
+PlaySongIntent play the song requested by {ContactName}
+PlaySongIntent play songs for me
