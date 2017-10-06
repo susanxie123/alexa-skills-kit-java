@@ -1,0 +1,20 @@
+FindChatIntent find a chat
+FindChatIntent find a chat for me
+FindChatIntent find me a chat mate
+FindChatIntent find me someone to chat with
+FindChatIntent find a chat and show my name as {UserName}
+FindChatIntent start a chat
+
+StartChatIntent start the chat
+
+TellIntent tell {ChatMateName} that {I am fine | Content}
+
+EndChatIntent end the chat
+EndChatIntent stop the chat
+
+SetUserNameIntent set my user name as {UserName}
+SetUserNameIntent set my name as {UserName}
+SetUserNameIntent set user name
+
+GetUserNameIntent what is my user name
+GetUserNameIntent what is my name

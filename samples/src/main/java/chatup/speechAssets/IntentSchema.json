@@ -1,0 +1,53 @@
+{
+  "intents": [
+    {
+      "intent": "FindChatIntent",
+      "slots": [
+        {
+          "name": "UserName",
+          "type": "USER_NAME_TYPE"
+        }
+      ]
+    },
+    {
+      "intent": "StartChatIntent"
+    },
+    {
+      "intent": "TellIntent",
+      "slots": [
+        {
+          "name": "Content",
+          "type": "AMAZON.LITERAL"
+        },
+        {
+          "name": "ChatMateName",
+          "type": "USER_NAME_TYPE"
+        }
+      ]
+    },
+    {
+      "intent": "EndChatIntent"
+    },
+    {
+      "intent": "SetUserNameIntent",
+      "slots": [
+        {
+          "name": "UserName",
+          "type": "USER_NAME_TYPE"
+        }
+      ]
+    },
+    {
+      "intent": "GetUserNameIntent"
+    },
+    {
+      "intent": "AMAZON.HelpIntent"
+    },
+    {
+      "intent": "AMAZON.StopIntent"
+    },
+    {
+      "intent": "AMAZON.CancelIntent"
+    }
+  ]
+}
