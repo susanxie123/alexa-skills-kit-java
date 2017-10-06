@@ -67,6 +67,8 @@ public class SongForYouSpeechlet implements Speechlet {
             }
             log.info("Found url {} for song {}", songUrl, songName);
 
+            // TODO: Validate the URL
+
             // Find the contact TODO: use account linking
             final String contactName = intent.getSlot(CONTACT_NAME_SLOT_TYPE).getValue();
             String phoneNumber;
@@ -85,8 +87,8 @@ public class SongForYouSpeechlet implements Speechlet {
             final String result = notificationSender.sendNotificationTo(phoneNumber);
             log.info("Sent notification with result {}", result);
 
-            // TODO: Record song url for this contact
-
+            // Store URL in database
+            requestedUrlDao.storeUrl(contactName, DEFAULT_USERNAME, songUrl);
 
             // Return response
             PlainTextOutputSpeech outputSpeech = new PlainTextOutputSpeech();

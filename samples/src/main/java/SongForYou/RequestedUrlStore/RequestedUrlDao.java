@@ -3,6 +3,7 @@ package SongForYou.RequestedUrlStore;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class RequestedUrlDao {
@@ -35,6 +36,18 @@ public class RequestedUrlDao {
         final String result = url.get(requestedBy);
         url.remove(requestedBy);
         return result;
+    }
+
+    public void storeUrl(String requestedFor, String requestedBy, String url) {
+        // See if the person is already in the database
+        RequestedUrlDataItem keyItem = new RequestedUrlDataItem();
+        keyItem.setRequestedFor(requestedFor);
+        RequestedUrlDataItem item = mapper.load(keyItem);
+        if (item == null) {
+            item = keyItem;
+        }
+        item.setUrl(requestedBy, url);
+        mapper.save(item);
     }
 
     private Map<String, String> getUrlMap(String requestedFor) {
