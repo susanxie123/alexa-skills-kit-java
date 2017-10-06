@@ -56,7 +56,14 @@ public class SongForYouSpeechlet implements Speechlet {
         if ("RequestSongIntent".equals(intent.getName())) {
             // Find the url for this song
             final String songName = intent.getSlot(SONG_NAME_SLOT_TYPE).getValue();
-            final String songUrl = getSongUrl(songName);
+            try {
+                final String songUrl = getSongUrl(songName);
+            }
+            catch (Exception ex) {
+                PlainTextOutputSpeech outputSpeech = new PlainTextOutputSpeech();
+                outputSpeech.setText("Cannot find the song named " + songName);
+                return SpeechletResponse.newTellResponse(outputSpeech);
+            }
 
             // Find the contact
             final String contactName = intent.getSlot(CONTACT_NAME_SLOT_TYPE).getValue();
