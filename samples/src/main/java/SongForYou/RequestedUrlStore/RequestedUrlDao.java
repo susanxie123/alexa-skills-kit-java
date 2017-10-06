@@ -3,6 +3,8 @@ package SongForYou.RequestedUrlStore;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 
+import java.util.Map;
+
 public class RequestedUrlDao {
 
     private AmazonDynamoDBClient dynamoDBClient;
@@ -14,17 +16,30 @@ public class RequestedUrlDao {
     }
 
     public String getRequestedUrl(String requestedFor) {
-        RequestedUrlDataItem keyItem = new RequestedUrlDataItem();
-        keyItem.setRequestedFor(requestedFor);
-        RequestedUrlDataItem item = mapper.load(keyItem);
-        //TODO: verify what will happen if multiple items responded
-        return item.getUrl();
+        Map<String, String> url = getUrlMap(requestedFor);
+        if (url.isEmpty()) {
+            return "";
+        }
+        final String[] requesterList = (String[]) url.keySet().toArray();
+        final String firstRequester = requesterList[0];
+        final String result = url.get(firstRequester);
+        url.remove(firstRequester);
+        return result;
     }
 
     public String getRequestedUrl(String requestedFor, String requestedBy) {
+        Map<String, String> url = getUrlMap(requestedFor);
+        if (!url.containsKey(requestedBy)) {
+            return "";
+        }
+        final String result = url.get(requestedBy);
+        url.remove(requestedBy);
+        return result;
+    }
+
+    private Map<String, String> getUrlMap(String requestedFor) {
         RequestedUrlDataItem keyItem = new RequestedUrlDataItem();
         keyItem.setRequestedFor(requestedFor);
-        keyItem.setRequestedBy(requestedBy);
         RequestedUrlDataItem item = mapper.load(keyItem);
         return item.getUrl();
     }

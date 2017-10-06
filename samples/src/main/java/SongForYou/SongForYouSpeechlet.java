@@ -2,14 +2,14 @@ package SongForYou;
 
 import java.io.*;
 import java.net.*;
+
+import com.amazon.speech.slu.Slot;
 import org.json.JSONObject;
 import SongForYou.Contacts.ContactsDao;
 import SongForYou.Notifications.NotificationSender;
 import SongForYou.RequestedUrlStore.RequestedUrlDao;
-import SongForYou.RequestedUrlStore.RequestedUrlDataItem;
 import com.amazon.speech.slu.Intent;
 import com.amazon.speech.speechlet.*;
-import com.amazon.speech.ui.OutputSpeech;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,6 @@ public class SongForYouSpeechlet implements Speechlet {
 
     private static final String CONTACT_NAME_SLOT_TYPE = "ContactName";
     private static final String SONG_NAME_SLOT_TYPE = "SongName";
-    private static final String DEFAULT_PHONENUMBER = "7348461740";
     private static final String DEFAULT_USERNAME = "Alice"; // This is the user that request and receive the song
 
     @Override
@@ -56,16 +55,19 @@ public class SongForYouSpeechlet implements Speechlet {
         if ("RequestSongIntent".equals(intent.getName())) {
             // Find the url for this song
             final String songName = intent.getSlot(SONG_NAME_SLOT_TYPE).getValue();
+            final String songUrl;
             try {
-                final String songUrl = getSongUrl(songName);
+                songUrl = getSongUrl(songName);
             }
             catch (Exception ex) {
+                log.error("Cannot find url for the song {} with error " + ex.getMessage(), songName);
                 PlainTextOutputSpeech outputSpeech = new PlainTextOutputSpeech();
-                outputSpeech.setText("Cannot find the song named " + songName);
+                outputSpeech.setText("Sorry, I cannot find the song named " + songName);
                 return SpeechletResponse.newTellResponse(outputSpeech);
             }
+            log.info("Found url {} for song {}", songUrl, songName);
 
-            // Find the contact
+            // Find the contact TODO: use account linking
             final String contactName = intent.getSlot(CONTACT_NAME_SLOT_TYPE).getValue();
             String phoneNumber;
             try {
@@ -74,7 +76,7 @@ public class SongForYouSpeechlet implements Speechlet {
             catch (NullPointerException ex) {
                 log.error("Contact {} is not in the database", contactName);
                 PlainTextOutputSpeech outputSpeech = new PlainTextOutputSpeech();
-                outputSpeech.setText("Sorry, cannot find " + contactName + " in your contacts list");
+                outputSpeech.setText("Sorry, I cannot find " + contactName + " in your contacts list");
                 return SpeechletResponse.newTellResponse(outputSpeech);
             }
             log.info("Retrieved phone number {} for contact {}", phoneNumber, contactName);
@@ -83,11 +85,10 @@ public class SongForYouSpeechlet implements Speechlet {
             final String result = notificationSender.sendNotificationTo(phoneNumber);
             log.info("Sent notification with result {}", result);
 
-            // Record song url for this contact
+            // TODO: Record song url for this contact
 
 
             // Return response
-
             PlainTextOutputSpeech outputSpeech = new PlainTextOutputSpeech();
             outputSpeech.setText("OK, sending song to " + contactName);
             return SpeechletResponse.newTellResponse(outputSpeech);
@@ -95,19 +96,30 @@ public class SongForYouSpeechlet implements Speechlet {
         else if ("PlaySongIntent".equals(intent.getName())) {
             // Maybe disambiguate the name??
 
-            // Find the song url from database?
+            // Find the song url from database
             String url;
-            try {
-                String requestedBy = intent.getSlot(CONTACT_NAME_SLOT_TYPE).getValue();
-                url = requestedUrlDao.getRequestedUrl(DEFAULT_USERNAME, requestedBy);
-            }
-            catch (NullPointerException ex) {
+            Slot requestedBySlot = intent.getSlot(CONTACT_NAME_SLOT_TYPE);
+            if (requestedBySlot == null) {
                 log.info("User did not specify who requested the song.");
                 url = requestedUrlDao.getRequestedUrl(DEFAULT_USERNAME);
+                if (url.isEmpty()) {
+                    PlainTextOutputSpeech outputSpeech = new PlainTextOutputSpeech();
+                    outputSpeech.setText("Sorry, nobody has requested you a song. Please try again later.");
+                    return SpeechletResponse.newTellResponse(outputSpeech);
+                }
+            }
+            else {
+                String requestedBy = requestedBySlot.getValue();
+                url = requestedUrlDao.getRequestedUrl(DEFAULT_USERNAME, requestedBy);
+                if (url.isEmpty()) {
+                    PlainTextOutputSpeech outputSpeech = new PlainTextOutputSpeech();
+                    outputSpeech.setText("Sorry, I cannot find the song requested by " + requestedBy);
+                    return SpeechletResponse.newTellResponse(outputSpeech);
+                }
             }
             log.info("Found the url for the requested song: {}", url);
 
-            // Return audio playback response
+            // TODO: Return audio playback response
             return new SpeechletResponse();
         }
         else if ("AMAZON.PauseIntent".equals(intent.getName())) {
